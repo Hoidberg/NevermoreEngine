@@ -28,11 +28,6 @@ local MyOtherModule = require(script.MyOtherModule)
 ```
 ]]
 
-local REPLICATION_FOLDER_NAME = "_replicationFolder"
-
---- Set this value to nil if you don't want to load modules by default
-local SERVER_SCRIPT_SERVICE_MODULES = "Nevermore"
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -50,29 +45,20 @@ if RunService:IsServer() and RunService:IsClient() then
 		ReplicationUtils.ScriptType.CLIENT;
 	})
 
-	if SERVER_SCRIPT_SERVICE_MODULES then
-		loader:AddModulesFromParent(ServerScriptService:WaitForChild(SERVER_SCRIPT_SERVICE_MODULES))
-	end
+	loader:AddModulesFromParent(ServerScriptService:WaitForChild("ServerModules"))
+	loader:AddModulesFromParent(ReplicatedStorage:WaitForChild("Modules"))
 
 	return loader
 elseif RunService:IsServer() then
-	local replicationFolder = ReplicationUtils.createReplicationFolder(REPLICATION_FOLDER_NAME)
-
 	local loader = ModuleScriptLoader.new(
 		{
 			-- Allowed modules
 			ReplicationUtils.ScriptType.SHARED;
 			ReplicationUtils.ScriptType.SERVER;
-		},
-		{
-			-- Replication map
-			[ReplicationUtils.ScriptType.CLIENT] = replicationFolder;
-			[ReplicationUtils.ScriptType.SHARED] = replicationFolder;
 		})
 
-	if SERVER_SCRIPT_SERVICE_MODULES then
-		loader:AddModulesFromParent(ServerScriptService:WaitForChild(SERVER_SCRIPT_SERVICE_MODULES))
-	end
+	loader:AddModulesFromParent(ServerScriptService:WaitForChild("ServerModules"))
+	loader:AddModulesFromParent(ReplicatedStorage:WaitForChild("Modules"))
 
 	return loader
 elseif RunService:IsClient() then
@@ -82,7 +68,7 @@ elseif RunService:IsClient() then
 		ReplicationUtils.ScriptType.CLIENT;
 	})
 
-	loader:AddModulesFromParent(ReplicatedStorage:WaitForChild(REPLICATION_FOLDER_NAME))
+	loader:AddModulesFromParent(ReplicatedStorage:WaitForChild("Modules"))
 
 	return loader
 else
